@@ -14,9 +14,6 @@ type BloomFilter struct {
 // n -> number of expected items -> eg: 1 million entries in the db
 // p -> probability of error or the false positive rate
 func New(n uint64, p float64) *BloomFilter { //size will be number of elements, eg: 1 million entries in the db
-	if n <= 0 || p < 0.0 || p > 1.0 {
-		panic("Not possible to create a bloom filter with these const")
-	}
 	size := computeBloomFilterSize(n, p) //no of bits total
 	k := uint64(float64(size) / float64(n) * math.Log(2))
 	return &BloomFilter{
@@ -36,52 +33,16 @@ func computeBloomFilterSize(n uint64, p float64) uint64 {
 func (b *BloomFilter) Add(item []byte) {
 	//will addd using hash functions
 	//run it through k hash functions and then add to bitset
-	//for each item, hash it k times
-	k := b.k
-	m := b.m
-	bitset := b.bitset
-	hash1, hash2 := computeHash(item)
-	var i uint64
-	for i = 0; i < k; i++ {
-		hash := hash1 + (i * hash2)
 
-		//now to add
-		//first mod by number of bits
-		bitIndex := hash % m //indicates which bit to set
-
-		//in array, each index can store 64 bits
-		arrIndex := bitIndex / 64
-		offSet := bitIndex % 64
-
-		bitset[arrIndex] = bitset[arrIndex] | (uint64(1) << offSet)
-
+	for i := range b.k {
+		hash := computeHash()
 	}
+
 }
 
 // TODO: Check if present
-func (b *BloomFilter) Contains(item []byte) bool {
-	k := b.k
-	m := b.m
-	bitset := b.bitset
-	hash1, hash2 := computeHash(item)
-	var i uint64
-	for i = 0; i < k; i++ {
-		hash := hash1 + (i * hash2)
+func (b *BloomFilter) Contains(item []byte) {
 
-		//now to add
-		//first mod by number of bits
-		bitIndex := hash % m //indicates which bit to set
-
-		//in array, each index can store 64 bits
-		arrIndex := bitIndex / 64
-		offSet := bitIndex % 64
-
-		num := bitset[arrIndex]
-		if num&((uint64(1))<<offSet) == 0 {
-			return false //definitely not there
-		}
-	}
-	return true //might be there
 }
 
 // Computes the size required for the bitset, each entry can store 64 values
