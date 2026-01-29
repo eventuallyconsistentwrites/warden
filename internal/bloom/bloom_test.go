@@ -33,7 +33,7 @@ func TestBloomFilter_ErrorRate(t *testing.T) {
 		bf.Add(item)
 	}
 
-	//now check error rate against 10k users that do not exist
+	//now check error rate against 9k users that do not exist
 	//user 1000 - user 9999 dont exist
 	trials := 9000
 	falsePositives := 0
