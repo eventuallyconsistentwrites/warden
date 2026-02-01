@@ -64,6 +64,16 @@ func main() {
 	warden := shield.New(bf, db, tableName)
 	http.HandleFunc("/check", warden.Handler)
 
+	http.HandleFunc("/admin/shield/on", func(w http.ResponseWriter, r *http.Request) {
+		warden.Enable()
+		w.Write([]byte("Shield Enabled"))
+	})
+
+	http.HandleFunc("/admin/shield/off", func(w http.ResponseWriter, r *http.Request) {
+		warden.Disable()
+		w.Write([]byte("Shield disabled"))
+	})
+
 	log.Printf("Warden is active on %s/check?id=...", serverPort)
 	if err = http.ListenAndServe(serverPort, nil); err != nil {
 		log.Fatal(err)
