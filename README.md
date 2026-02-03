@@ -180,4 +180,6 @@ warden/
 ## Learn More
 
 This project accompanies a blog post that goes deeper into Bloom Filter theory, the math behind sizing, and real-world use cases in systems like Cassandra and Bigtable.
+Link to the blog : [Bloom Filters — blog post](https://eventuallyconsistentwrites.substack.com/p/probabilistic-data-structures-the)
+
 
