@@ -56,7 +56,7 @@ exists, _ := store.Check(id)
 
 We ran a stress test with 160 concurrent workers sending a mix of valid and invalid requests.
 
-![Benchmark Results](benchmark_plot.png)
+![Benchmark Results](imgs/benchmark_plot.png)
 
 | Mode | Requests/Second | Notes |
 |------|-----------------|-------|
@@ -120,11 +120,11 @@ In Go, each `bool` takes up 1 byte (8 bits), even though it only represents a si
 
 To fix this, we use a `[]uint64` array instead. Each `uint64` holds 64 bits, so we can pack them tightly with no wasted space.
 
-![Bool array approach](with_bool_array.png)
+![Bool array approach](imgs/with_bool_array.png)
 
 *With `[]bool`, each bit uses a full byte. Wasteful.*
 
-![Uint64 array approach](with_uint64_array.png)
+![Uint64 array approach](imgs/with_uint64_array.png)
 
 *With `[]uint64`, we pack 64 bits per element. 8x more efficient.*
 
@@ -150,9 +150,7 @@ warden/
 │   ├── server/main.go     # HTTP server with the shield
 │   └── loadgen/main.go    # Load testing tool
 ├── internal/
-│   ├── bloom/bloom.go     # Bloom Filter implementation
-│   └── store/store.go     # SQLite database wrapper
-├── shield/middleware.go   # The filtering logic
+├── imgs/                  # Benchmark and technical diagrams
 └── README.md
 ```
 
