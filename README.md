@@ -91,24 +91,29 @@ Bloom filter loaded! (1000000 items in 410ms)
 Warden is active on :8080/check?id=...
 ```
 
-### Run the Load Test
+### Run the Benchmark
 
-In another terminal:
+To see the performance difference, we run two separate tests and compare the results.
 
+#### 1. Test Shield OFF (Direct DB access)
 ```bash
-./loadgen output.csv
+# Disable the filter
+curl http://localhost:8080/admin/shield/off
+
+# Run load generator
+./loadgen shield_off.csv
 ```
 
-This starts 160 workers that continuously send requests — half valid, half random.
-
-### Toggle the Shield
-
-You can turn the filter on and off while the server is running:
-
+#### 2. Test Shield ON (Bloom Filter active)
 ```bash
-curl http://localhost:8080/admin/shield/off   # Direct DB access
-curl http://localhost:8080/admin/shield/on    # Bloom Filter enabled
+# Enable the filter
+curl http://localhost:8080/admin/shield/on
+
+# Run load generator
+./loadgen shield_on.csv
 ```
+
+This starts 160 workers that continuously send requests — 50% for valid IDs and 50% for random non-existent IDs. You can watch the RPS in real-time in your terminal.
 
 ---
 
