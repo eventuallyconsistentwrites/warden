@@ -161,8 +161,12 @@ warden/
 
 ### The Bloom Filter (`internal/bloom`)
 
-- Uses double hashing with FNV-64a to generate multiple hash positions from a single input.
-- The array size and number of hash functions are calculated using standard formulas to achieve a ~1% false positive rate.
+- Uses **Double Hashing** to generate multiple hash positions from a single input without the overhead of running $k$ different hash functions.
+- For each item, we compute two base hashes ($h_1$ and $h_2$) using FNV-64a. We then generate $k$ indices using the formula:
+  $$g_i(x) = (h_1(x) + i \cdot h_2(x)) \pmod m$$
+  where $i$ ranges from $0$ to $k-1$.
+- This technique is based on research by Kirsch and Mitzenmacher, proving it provides the same asymptotic perfection as using $k$ independent hash functions while being significantly faster.
+- The array size ($m$) and number of hash functions ($k$) are calculated using standard formulas to achieve a ~1% false positive rate.
 - For 1 million items, this works out to about 9.6 million bits and 7 hash functions.
 
 ### The Load Generator (`cmd/loadgen`)
