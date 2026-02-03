@@ -7,6 +7,8 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"os"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -36,13 +38,16 @@ func (s *Stats) IncFail() {
 }
 
 func main() {
-	const numWorkers = 100 //100 goroutines
+	// Use GOMAXPROCS * 20 for I/O heavy workload (HTTP requests)
+	numWorkers := runtime.GOMAXPROCS(0) * 20
+	fmt.Printf("Running with %d workers (GOMAXPROCS * 20)...\n", numWorkers)
+
 	s := &Stats{}
 
 	//custom transport, as making a new client in the function everytime would
 	//Default max idle conns is 100, but per host is 2, we need it to be more to reuse conns and avoid the handshake overhead each time
 	transport := http.Transport{
-		MaxIdleConnsPerHost: 100, //Default is 2, should be >=numWorkers
+		MaxIdleConnsPerHost: numWorkers, //Default is 2, should be >=numWorkers
 	}
 	client := http.Client{
 		Transport: &transport,
@@ -57,7 +62,7 @@ func main() {
 		}(i)
 	}
 
-	go reporter(s)
+	go reporter(s, os.Args[1])
 
 	wg.Wait()
 
@@ -99,9 +104,21 @@ func generateTarget(r *rand.Rand) string {
 	}
 }
 
-func reporter(s *Stats) {
+func reporter(s *Stats, filename string) {
+	f, err := os.Create(filename)
+	if err != nil {
+		fmt.Printf("Error creating file: %v\n", err)
+		return
+	}
+	defer f.Close()
+
+	// Write header
+	f.WriteString("Time,RPS\n")
+
 	ticker := time.NewTicker(1 * time.Second)
 	var prevTotal uint64
+	startTime := time.Now()
+
 	//TICKER.C -> channel on which tickes are delivered
 	for range ticker.C {
 		total, success, fail := s.Get()
@@ -110,8 +127,11 @@ func reporter(s *Stats) {
 		reqPerSecond := total - prevTotal
 		prevTotal = total
 
+		elapsed := time.Since(startTime).Seconds()
 		fmt.Printf("\rRps: %d | Total: %d | Success: %d | Fail(or Blocked): %d", reqPerSecond, total, success, fail)
 
+		// Write to CSV
+		f.WriteString(fmt.Sprintf("%.1f,%d\n", elapsed, reqPerSecond))
 	}
 	time.Sleep(time.Second)
 }
